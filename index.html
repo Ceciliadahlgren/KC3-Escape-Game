@@ -106,6 +106,11 @@
     .options { display: grid; gap: 10px; margin: 16px 0; }
     .option { padding: 12px 14px; border: 1px solid var(--line); border-radius: 13px; background: #f9faf9; }
     .formula { margin: 14px 0; padding: 14px; border-left: 4px solid var(--gold); background: #faf6e9; border-radius: 0 12px 12px 0; }
+    .destination { text-align: center; padding: 6px 0 2px; }
+    .destination-marker { display: grid; place-items: center; width: 72px; height: 72px; margin: 0 auto 18px; border-radius: 50% 50% 50% 12px; transform: rotate(-45deg); background: var(--forest); color: #fff; box-shadow: 0 10px 28px rgba(23,63,49,.22); }
+    .destination-marker span { transform: rotate(45deg); font-size: 1.55rem; font-weight: 850; }
+    .arrival-rule { margin: 22px 0 0; padding: 16px; border-radius: 14px; background: #f3efe2; border: 1px solid #d9c27d; text-align: left; }
+    .safety-note { margin-top: 12px; color: var(--danger); font-size: .9rem; font-weight: 700; }
 
     .answer-row { display: grid; grid-template-columns: 92px 1fr; align-items: center; gap: 14px; margin-top: 22px; padding-top: 20px; border-top: 1px solid var(--line); }
     .digit-input { width: 92px; height: 62px; border: 2px solid #9ca9a2; border-radius: 14px; text-align: center; font-size: 2rem; font-weight: 850; color: var(--forest); background: #fff; }
@@ -166,14 +171,14 @@
         <h2>Uppdraget</h2>
         <div class="brief">
           <div><strong>5</strong><span>stationer</span></div>
-          <div><strong>5</strong><span>minuter</span></div>
+          <div><strong>5</strong><span>minuter per uppgift</span></div>
           <div><strong>1</strong><span>siffra per svar</span></div>
         </div>
         <ol class="rules">
-          <li>Gå till stationen som visas på skärmen.</li>
-          <li>Starta rundan först när spelledaren ger signal.</li>
+          <li>Följ platsledtråden och gå tillsammans till stationen som visas.</li>
+          <li>Tryck inte på öppna uppgiften förrän hela laget är på plats.</li>
           <li>Lös uppgiften tillsammans och skriv in en siffra.</li>
-          <li>Byt station när tiden är slut. Använd inte internet eller miniräknare.</li>
+          <li>När svaret är sparat får ni vägbeskrivningen till nästa station. Använd inte internet eller miniräknare.</li>
           <li>Efter fem stationer använder ni svaren för att räkna fram slutkoden.</li>
         </ol>
         <div class="formula"><strong>Er startstation:</strong> <span id="start-station"></span></div>
@@ -220,6 +225,30 @@
       gul:   { name: 'Gul',  color: '#d5a526', route: [3,4,5,1,2] },
       rod:   { name: 'Röd',  color: '#b64943', route: [4,5,1,2,3] },
       lila:  { name: 'Lila', color: '#7550a6', route: [5,1,2,3,4] }
+    };
+
+    const locations = {
+      1: {
+        name: 'Den runda gräsytan väster om slottet',
+        clue: 'Sök den runda gröna ytan på slottets västra sida, mellan huvudbyggnaden och vägen.'
+      },
+      2: {
+        name: 'Den fyrdelade trädgården på borggården',
+        clue: 'Sök den symmetriska trädgården där fyra gröna fält bildar ett mönster framför den långa flygeln.'
+      },
+      3: {
+        name: 'Gräsytan norr om den långa flygeln',
+        clue: 'Gå runt den långa flygeln med rött tak och samlas på gräsytan på dess norra sida.'
+      },
+      4: {
+        name: 'Den stora gräsmattan i slottsparken',
+        clue: 'Sök parkens största öppna gräsyta söder om slottet.'
+      },
+      5: {
+        name: 'Bryggan vid vattnet',
+        clue: 'Följ gångvägen mot vattnet nordost om slottet. Samlas vid bryggans början – ni behöver inte gå ut på bryggan.',
+        safety: 'Följ gångvägen och korsa Margretelundsvägen försiktigt.'
+      }
     };
 
     const stations = {
@@ -320,6 +349,36 @@
       $('progress').innerHTML = teams[state.team].route.map((_,i) => `<span class="${i < state.round ? 'done' : i === state.round ? 'current' : ''}"></span>`).join('');
     }
 
+    function renderDestination() {
+      clearInterval(interval);
+      state.running = false;
+      state.seconds = 300;
+      const team = teams[state.team];
+      const stationNo = team.route[state.round];
+      const location = locations[stationNo];
+      $('round-label').textContent = `Runda ${state.round + 1} av 5 · På väg till station ${stationNo}`;
+      $('route-label').textContent = `Lag ${team.name} · ordning ${team.route.join('–')}`;
+      $('timer').textContent = 'PÅ VÄG';
+      $('timer').classList.remove('warning');
+      renderProgress();
+      $('station-card').innerHTML = `
+        <div class="destination">
+          <div class="destination-marker" aria-hidden="true"><span>${stationNo}</span></div>
+          <div class="station-number">Nästa kontrollpunkt</div>
+          <h2>${location.name}</h2>
+          <p>${location.clue}</p>
+          ${location.safety ? `<div class="safety-note">${location.safety}</div>` : ''}
+          <div class="arrival-rule"><strong>Öppna inte uppgiften ännu.</strong><br>När hela laget är på plats trycker ni på knappen. Då visas uppgiften och femminuterstimern startar.</div>
+          <button class="primary" id="open-station">Hela laget är på plats – öppna uppgiften</button>
+        </div>`;
+      $('open-station').addEventListener('click', () => {
+        renderStation();
+        startTimer();
+        $('timer-button').textContent = 'Pausa tiden';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    }
+
     function renderStation() {
       const team = teams[state.team];
       const stationNo = team.route[state.round];
@@ -372,7 +431,7 @@
       state.answers[stationNo] = value;
       clearInterval(interval);
       state.running = false;
-      if (state.round < 4) { state.round++; renderStation(); window.scrollTo({top:0}); }
+      if (state.round < 4) { state.round++; renderDestination(); window.scrollTo({top:0}); }
       else renderFinal();
     }
 
@@ -384,11 +443,11 @@
     $('to-briefing').addEventListener('click', () => {
       const team = teams[state.team];
       $('brief-team').textContent = `Lag ${team.name} · ${team.route.join(' → ')}`;
-      $('start-station').textContent = `Station ${team.route[0]}`;
+      $('start-station').textContent = `Station ${team.route[0]} – ${locations[team.route[0]].name}`;
       show('briefing-view');
     });
     $('back-to-teams').addEventListener('click', () => show('start-view'));
-    $('begin-game').addEventListener('click', () => { state.round = 0; state.answers = {}; renderStation(); show('game-view'); });
+    $('begin-game').addEventListener('click', () => { state.round = 0; state.answers = {}; renderDestination(); show('game-view'); });
     $('review-answers').addEventListener('click', () => { state.round = 0; renderStation(); show('game-view'); });
 
     buildTeams();
