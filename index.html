@@ -1,0 +1,397 @@
+<!doctype html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#13261f">
+  <meta name="description" content="KC3:s metodiska escape game vid Ulfsunda slott">
+  <title>KC3 – Mysteriet med den försvunna datafilen</title>
+  <style>
+    :root {
+      --ink: #17211d;
+      --muted: #5c6862;
+      --paper: #fbfaf6;
+      --card: #ffffff;
+      --forest: #173f31;
+      --forest-2: #245b47;
+      --gold: #d6a948;
+      --line: #d8ddd9;
+      --danger: #a63c37;
+      --shadow: 0 18px 60px rgba(19, 38, 31, .14);
+      --radius: 22px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 15% 0%, rgba(214, 169, 72, .16), transparent 30rem),
+        linear-gradient(180deg, #edf2ed 0, var(--paper) 22rem);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.5;
+    }
+
+    button, input { font: inherit; }
+    button { touch-action: manipulation; }
+    .shell { width: min(760px, 100%); margin: 0 auto; padding: 20px 16px 56px; }
+    .masthead { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; }
+    .seal {
+      display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%;
+      background: var(--forest); color: #fff; font-weight: 850; letter-spacing: -.04em;
+      box-shadow: 0 6px 22px rgba(23, 63, 49, .25);
+    }
+    .masthead strong { display: block; font-size: .92rem; letter-spacing: .08em; text-transform: uppercase; }
+    .masthead span { color: var(--muted); font-size: .86rem; }
+
+    .hero { padding: 32px 0 14px; }
+    .eyebrow { margin: 0 0 8px; color: var(--forest-2); font-size: .82rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+    h1 { margin: 0; max-width: 680px; font-family: Georgia, "Times New Roman", serif; font-size: clamp(2.3rem, 9vw, 4.5rem); line-height: .98; letter-spacing: -.045em; }
+    .lead { margin: 22px 0 0; max-width: 650px; font-size: 1.08rem; color: #405048; }
+
+    .card { margin-top: 24px; padding: clamp(20px, 5vw, 34px); background: rgba(255,255,255,.94); border: 1px solid rgba(23,63,49,.12); border-radius: var(--radius); box-shadow: var(--shadow); }
+    .card h2 { margin: 0 0 8px; font-family: Georgia, "Times New Roman", serif; font-size: clamp(1.55rem, 5vw, 2.15rem); line-height: 1.1; }
+    .card h3 { margin: 24px 0 8px; font-size: 1.05rem; }
+    .muted { color: var(--muted); }
+    .small { font-size: .88rem; }
+    .hidden { display: none !important; }
+
+    .team-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 22px; }
+    .team-button {
+      min-height: 72px; padding: 14px; border: 2px solid transparent; border-radius: 16px;
+      background: #eef1ef; color: var(--ink); font-weight: 800; cursor: pointer;
+      transition: transform .12s ease, border-color .12s ease, box-shadow .12s ease;
+    }
+    .team-button:active { transform: scale(.98); }
+    .team-button.selected { border-color: var(--forest); box-shadow: 0 0 0 3px rgba(23,63,49,.12); }
+    .team-dot { display: inline-block; width: 13px; height: 13px; margin-right: 8px; border-radius: 50%; vertical-align: -1px; }
+    .team-button:last-child:nth-child(odd) { grid-column: 1 / -1; }
+
+    .primary, .secondary, .text-button {
+      min-height: 50px; border-radius: 14px; font-weight: 800; cursor: pointer;
+    }
+    .primary { width: 100%; margin-top: 20px; padding: 13px 20px; border: 0; color: #fff; background: var(--forest); box-shadow: 0 8px 24px rgba(23,63,49,.22); }
+    .primary:disabled { cursor: not-allowed; opacity: .38; box-shadow: none; }
+    .secondary { padding: 11px 16px; border: 1px solid #bfc8c2; background: #fff; color: var(--ink); }
+    .text-button { min-height: 42px; padding: 8px 2px; border: 0; background: transparent; color: var(--forest); text-decoration: underline; text-underline-offset: 3px; }
+
+    .brief { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 22px 0; }
+    .brief div { padding: 14px 8px; text-align: center; border-radius: 14px; background: #f1f4f1; }
+    .brief strong { display: block; font-size: 1.35rem; }
+    .brief span { font-size: .75rem; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+    .rules { margin: 18px 0 0; padding-left: 22px; }
+    .rules li + li { margin-top: 8px; }
+
+    .game-top { position: sticky; top: 0; z-index: 4; margin: -20px -16px 18px; padding: max(12px, env(safe-area-inset-top)) 16px 12px; background: rgba(251,250,246,.92); backdrop-filter: blur(14px); border-bottom: 1px solid rgba(23,63,49,.12); }
+    .game-top-inner { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 12px; width: min(728px, 100%); margin: 0 auto; }
+    .round-label { font-weight: 850; }
+    .route-label { color: var(--muted); font-size: .82rem; }
+    .timer { min-width: 92px; padding: 8px 12px; border-radius: 12px; background: var(--forest); color: #fff; text-align: center; font-variant-numeric: tabular-nums; font-size: 1.35rem; font-weight: 850; letter-spacing: .03em; }
+    .timer.warning { background: var(--danger); animation: pulse 1s ease-in-out infinite alternate; }
+    @keyframes pulse { to { transform: scale(1.025); } }
+
+    .progress { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin: 16px 0 22px; }
+    .progress span { height: 7px; border-radius: 999px; background: #dce2de; }
+    .progress span.done { background: var(--forest); }
+    .progress span.current { background: var(--gold); }
+
+    .station-number { color: var(--forest-2); font-size: .8rem; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+    .question { margin: 20px 0 8px; font-weight: 750; }
+    .data-table { width: 100%; margin: 18px 0; border-collapse: collapse; font-size: .9rem; }
+    .data-table th, .data-table td { padding: 10px 8px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+    .data-table th { color: #435149; font-size: .78rem; }
+    .data-table tr:last-child td { border-bottom: 0; }
+    .options { display: grid; gap: 10px; margin: 16px 0; }
+    .option { padding: 12px 14px; border: 1px solid var(--line); border-radius: 13px; background: #f9faf9; }
+    .formula { margin: 14px 0; padding: 14px; border-left: 4px solid var(--gold); background: #faf6e9; border-radius: 0 12px 12px 0; }
+
+    .answer-row { display: grid; grid-template-columns: 92px 1fr; align-items: center; gap: 14px; margin-top: 22px; padding-top: 20px; border-top: 1px solid var(--line); }
+    .digit-input { width: 92px; height: 62px; border: 2px solid #9ca9a2; border-radius: 14px; text-align: center; font-size: 2rem; font-weight: 850; color: var(--forest); background: #fff; }
+    .digit-input:focus { outline: 3px solid rgba(214,169,72,.35); border-color: var(--forest); }
+    .hint-box { margin-top: 18px; padding: 16px; border-radius: 14px; background: #f3efe2; border: 1px dashed #c09a46; }
+    .hint-box strong { display: block; margin-bottom: 4px; }
+    .actions { display: grid; grid-template-columns: 1fr 1.4fr; gap: 10px; margin-top: 22px; }
+    .actions .primary { margin: 0; }
+
+    .answers { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin: 22px 0; }
+    .answer-chip { padding: 12px 4px; border-radius: 13px; background: #eef2ef; text-align: center; }
+    .answer-chip span { display: block; color: var(--muted); font-size: .72rem; text-transform: uppercase; }
+    .answer-chip strong { font-size: 1.45rem; }
+    .final-steps { margin: 20px 0; padding-left: 24px; }
+    .final-steps li + li { margin-top: 12px; }
+    .code-boxes { display: flex; justify-content: center; gap: 10px; margin: 26px 0; }
+    .code-boxes span { width: 54px; height: 64px; border: 2px solid var(--forest); border-radius: 13px; background: #fff; }
+    .callout { padding: 16px; border-radius: 14px; background: var(--forest); color: #fff; }
+    .footer { margin-top: 28px; text-align: center; color: var(--muted); font-size: .78rem; }
+
+    @media (min-width: 620px) {
+      .shell { padding-top: 30px; }
+      .team-grid { grid-template-columns: repeat(5, 1fr); }
+      .team-button:last-child:nth-child(odd) { grid-column: auto; }
+      .card { padding: 36px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; animation: none !important; transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="masthead">
+      <div class="seal" aria-hidden="true">K3</div>
+      <div><strong>KC3</strong><span>Heldag på Ulfsunda slott</span></div>
+    </header>
+
+    <section id="start-view">
+      <div class="hero">
+        <p class="eyebrow">Ett metodiskt escape game</p>
+        <h1>Mysteriet med den försvunna datafilen</h1>
+        <p class="lead">En central resultatfil har försvunnit. Fem kontrollstationer skyddar återställningsnyckeln. Ert uppdrag är att lösa dem innan tiden tar slut.</p>
+      </div>
+
+      <div class="card">
+        <h2>Välj ert lag</h2>
+        <p class="muted">Lagvalet avgör i vilken ordning ni besöker stationerna.</p>
+        <div class="team-grid" id="team-grid"></div>
+        <button class="primary" id="to-briefing" disabled>Fortsätt</button>
+      </div>
+    </section>
+
+    <section id="briefing-view" class="hidden">
+      <div class="card">
+        <p class="eyebrow" id="brief-team"></p>
+        <h2>Uppdraget</h2>
+        <div class="brief">
+          <div><strong>5</strong><span>stationer</span></div>
+          <div><strong>5</strong><span>minuter</span></div>
+          <div><strong>1</strong><span>siffra per svar</span></div>
+        </div>
+        <ol class="rules">
+          <li>Gå till stationen som visas på skärmen.</li>
+          <li>Starta rundan först när spelledaren ger signal.</li>
+          <li>Lös uppgiften tillsammans och skriv in en siffra.</li>
+          <li>Byt station när tiden är slut. Använd inte internet eller miniräknare.</li>
+          <li>Efter fem stationer använder ni svaren för att räkna fram slutkoden.</li>
+        </ol>
+        <div class="formula"><strong>Er startstation:</strong> <span id="start-station"></span></div>
+        <button class="primary" id="begin-game">Vi är redo</button>
+        <button class="text-button" id="back-to-teams">Byt lag</button>
+      </div>
+    </section>
+
+    <section id="game-view" class="hidden">
+      <div class="game-top">
+        <div class="game-top-inner">
+          <div><div class="round-label" id="round-label"></div><div class="route-label" id="route-label"></div></div>
+          <div class="timer" id="timer" aria-live="polite">05:00</div>
+        </div>
+      </div>
+      <div class="progress" id="progress" aria-label="Framsteg"></div>
+      <article class="card" id="station-card"></article>
+    </section>
+
+    <section id="final-view" class="hidden">
+      <div class="card">
+        <p class="eyebrow">Slutuppdrag</p>
+        <h2>Återställningssystemet sparar differenser</h2>
+        <p>Ni har samlat fem stationssvar. Nu ska de omvandlas till en fyrsiffrig kod.</p>
+        <div class="answers" id="answer-summary"></div>
+        <ol class="final-steps">
+          <li>Sortera de fem svaren från det minsta till det största.</li>
+          <li>Beräkna skillnaden mellan varje par av intilliggande värden.</li>
+          <li>De fyra differenserna, i samma ordning, bildar återställningskoden.</li>
+        </ol>
+        <div class="code-boxes" aria-label="Fyra tomma rutor för slutkoden"><span></span><span></span><span></span><span></span></div>
+        <div class="callout"><strong>Först med rätt kod vinner.</strong><br>Lämna koden tyst till spelledaren. Skriv inte in den på webbplatsen.</div>
+        <button class="text-button" id="review-answers">Gå tillbaka och kontrollera svar</button>
+      </div>
+    </section>
+
+    <footer class="footer">KC3 · Kvantitativ metod · Ulfsunda slott</footer>
+  </main>
+
+  <script>
+    const teams = {
+      bla:   { name: 'Blå',  color: '#2864a7', route: [1,2,3,4,5] },
+      gron:  { name: 'Grön', color: '#2d7a4e', route: [2,3,4,5,1] },
+      gul:   { name: 'Gul',  color: '#d5a526', route: [3,4,5,1,2] },
+      rod:   { name: 'Röd',  color: '#b64943', route: [4,5,1,2,3] },
+      lila:  { name: 'Lila', color: '#7550a6', route: [5,1,2,3,4] }
+    };
+
+    const stations = {
+      1: {
+        title: 'Den skenbara kvalitetsskillnaden',
+        intro: 'Två vårdcentraler redovisar samma resultat inom varje behovsgrupp men olika totalresultat.',
+        table: [['Vårdcentral','Behovsgrupp','Uppnått mål','Totalt','Andel'],['A','Mindre behov','81','90','90 %'],['A','Stora behov','4','10','40 %'],['A','Alla','85','100','85 %'],['B','Mindre behov','9','10','90 %'],['B','Stora behov','36','90','40 %'],['B','Alla','45','100','45 %']],
+        question: 'Vilken slutsats är mest korrekt?',
+        options: ['Vårdcentral A har bättre resultat i båda behovsgrupperna.','Vårdcentral B har bättre resultat bland patienter med stora behov.','Totalskillnaden kan helt förklaras av olika patientsammansättning. Tabellen visar ingen resultatskillnad inom behovsgrupperna.','Standardisering är onödig eftersom vårdcentralerna har lika många patienter totalt.','Behovsgrupp kan inte påverka jämförelsen eftersom utfallet är detsamma inom grupperna.'],
+        hint: 'Jämför vårdcentralerna inom respektive behovsgrupp innan ni tolkar totalandelarna. Fundera på varför totalerna ändå skiljer sig.'
+      },
+      2: {
+        title: 'Kalibreringsvikterna',
+        intro: 'Urvalets åldersfördelning skiljer sig från målpopulationens.',
+        table: [['Åldersgrupp','Antal i urvalet','Medelvärde','Andel i målpopulationen'],['18–39 år','60','4','25 %'],['40–64 år','30','8','50 %'],['65 år och äldre','10','8','25 %']],
+        question: 'Vilket blir det kalibrerade medelvärdet om skattningen ska spegla målpopulationens åldersfördelning?',
+        note: 'Använd målpopulationens andelar som vikter. Urvalsstorlekarna visar varför det oviktade resultatet blir missvisande men ska inte användas en gång till i beräkningen.',
+        hint: 'Multiplicera varje gruppmedelvärde med gruppens andel i målpopulationen och summera. Uttryck andelarna som 0,25, 0,50 och 0,25.'
+      },
+      3: {
+        title: 'Effekten bakom tidstrenden',
+        intro: 'Beräkna en difference in differences-skattning.',
+        table: [['Grupp','Före','Efter','Förändring'],['Interventionsgrupp','6,2','7,8','?'],['Jämförelsegrupp','5,5','6,1','?']],
+        question: 'Hur stor är difference in differences-skattningen?',
+        note: 'Beräkna först förändringen över tid i respektive grupp. Dra sedan jämförelsegruppens förändring från interventionsgruppens förändring. Anta att gemensamma trender är ett rimligt antagande. Svara med en siffra utan decimaltecken.',
+        hint: 'Interventionsgruppen förändras med 1,6 och jämförelsegruppen med 0,6. Skillnaden mellan förändringarna är skattningen.'
+      },
+      4: {
+        title: 'Från riskdifferens till NNT',
+        intro: 'Beräkna hur många som behöver få insatsen för att ett utfall ska förebyggas.',
+        table: [['Grupp','Antal personer','Antal med utfallet','Risk'],['Insats','100','13','?'],['Kontroll','100','25','?']],
+        question: 'Vilket är number needed to treat, NNT?',
+        note: 'Beräkna den absoluta riskreduktionen som risk i kontrollgruppen minus risk i insatsgruppen. NNT är 1 dividerat med den absoluta riskreduktionen uttryckt som andel. Ett NNT som inte är ett heltal avrundas alltid uppåt.',
+        hint: 'Riskerna är 0,13 och 0,25. Den absoluta riskreduktionen är 0,12. Dividera 1 med 0,12 och avrunda uppåt.'
+      },
+      5: {
+        title: 'Dubbletterna i registret',
+        intro: 'Bestäm antalet unika personer efter deduplicering. Två rader avser samma person om de har samma person-ID eller om både födelsedatum och postnummer är identiska. Regeln får tillämpas transitivt.',
+        table: [['Rad','Person-ID','Födelsedatum','Postnummer'],['A','101','1980-01-02','111 22'],['B','101','1980-01-02','Saknas'],['C','202','1975-06-14','222 33'],['D','Saknas','1975-06-14','222 33'],['E','303','1988-09-21','333 44'],['F','404','1968-12-05','444 55'],['G','Saknas','1968-12-05','444 55']],
+        question: 'Hur många unika personer finns i materialet?',
+        hint: 'B hör ihop med A via person-ID. D hör ihop med C via födelsedatum och postnummer. Pröva samma regel på F och G.'
+      }
+    };
+
+    let state = { team: null, round: 0, answers: {}, seconds: 300, running: false, hint: false };
+    let interval = null;
+    const $ = id => document.getElementById(id);
+
+    function show(view) {
+      ['start-view','briefing-view','game-view','final-view'].forEach(id => $(id).classList.toggle('hidden', id !== view));
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function buildTeams() {
+      $('team-grid').innerHTML = Object.entries(teams).map(([id,t]) => `<button class="team-button" data-team="${id}"><span class="team-dot" style="background:${t.color}"></span>Lag ${t.name}</button>`).join('');
+      document.querySelectorAll('.team-button').forEach(button => button.addEventListener('click', () => {
+        state.team = button.dataset.team;
+        document.querySelectorAll('.team-button').forEach(b => b.classList.toggle('selected', b === button));
+        $('to-briefing').disabled = false;
+      }));
+    }
+
+    function tableHTML(rows) {
+      const [head, ...body] = rows;
+      return `<div style="overflow-x:auto"><table class="data-table"><thead><tr>${head.map(x => `<th>${x}</th>`).join('')}</tr></thead><tbody>${body.map(row => `<tr>${row.map(x => `<td>${x}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+    }
+
+    function updateTimer() {
+      const min = String(Math.floor(state.seconds / 60)).padStart(2,'0');
+      const sec = String(state.seconds % 60).padStart(2,'0');
+      $('timer').textContent = `${min}:${sec}`;
+      $('timer').classList.toggle('warning', state.seconds <= 60);
+      if (state.seconds <= 150) enableHint();
+    }
+
+    function startTimer() {
+      clearInterval(interval);
+      state.running = true;
+      interval = setInterval(() => {
+        if (state.seconds > 0) {
+          state.seconds--;
+          updateTimer();
+        } else {
+          clearInterval(interval);
+          state.running = false;
+          if (navigator.vibrate) navigator.vibrate([250,100,250]);
+          $('timer').textContent = 'BYT';
+        }
+      }, 1000);
+    }
+
+    function enableHint() {
+      const button = $('hint-button');
+      if (button) { button.disabled = false; button.textContent = 'Visa ledtråd'; }
+    }
+
+    function renderProgress() {
+      $('progress').innerHTML = teams[state.team].route.map((_,i) => `<span class="${i < state.round ? 'done' : i === state.round ? 'current' : ''}"></span>`).join('');
+    }
+
+    function renderStation() {
+      const team = teams[state.team];
+      const stationNo = team.route[state.round];
+      const s = stations[stationNo];
+      state.seconds = 300;
+      state.hint = false;
+      $('round-label').textContent = `Runda ${state.round + 1} av 5 · Station ${stationNo}`;
+      $('route-label').textContent = `Lag ${team.name} · ordning ${team.route.join('–')}`;
+      renderProgress();
+      $('station-card').innerHTML = `
+        <div class="station-number">Station ${stationNo}</div>
+        <h2>${s.title}</h2>
+        <p>${s.intro}</p>
+        ${tableHTML(s.table)}
+        <p class="question">${s.question}</p>
+        ${s.options ? `<div class="options">${s.options.map((x,i) => `<div class="option"><strong>${i+1}.</strong> ${x}</div>`).join('')}</div>` : ''}
+        ${s.note ? `<div class="formula">${s.note}</div>` : ''}
+        <div class="answer-row">
+          <input class="digit-input" id="answer-input" aria-label="Lagets ensiffriga svar" inputmode="numeric" maxlength="1" pattern="[0-9]" value="${state.answers[stationNo] ?? ''}">
+          <div><strong>Lagets svar</strong><br><span class="muted small">Skriv en siffra 0–9</span></div>
+        </div>
+        <button class="secondary" id="hint-button" disabled>Ledtråd öppnas efter 02:30</button>
+        <div class="hint-box hidden" id="hint-box"><strong>Ledtråd</strong>${s.hint}</div>
+        <div class="actions">
+          <button class="secondary" id="timer-button">Starta tiden</button>
+          <button class="primary" id="next-button">${state.round === 4 ? 'Till slutuppdraget' : 'Spara och nästa station'}</button>
+        </div>`;
+
+      const input = $('answer-input');
+      input.addEventListener('input', () => { input.value = input.value.replace(/\D/g,'').slice(0,1); });
+      $('hint-button').addEventListener('click', () => { $('hint-box').classList.remove('hidden'); state.hint = true; });
+      $('timer-button').addEventListener('click', () => {
+        if (!state.running) { startTimer(); $('timer-button').textContent = 'Pausa tiden'; }
+        else { clearInterval(interval); state.running = false; $('timer-button').textContent = 'Fortsätt tiden'; }
+      });
+      $('next-button').addEventListener('click', nextStation);
+      updateTimer();
+    }
+
+    function nextStation() {
+      const stationNo = teams[state.team].route[state.round];
+      const value = $('answer-input').value;
+      if (!/^[0-9]$/.test(value)) {
+        $('answer-input').focus();
+        $('answer-input').setCustomValidity('Skriv in en siffra mellan 0 och 9.');
+        $('answer-input').reportValidity();
+        $('answer-input').setCustomValidity('');
+        return;
+      }
+      state.answers[stationNo] = value;
+      clearInterval(interval);
+      state.running = false;
+      if (state.round < 4) { state.round++; renderStation(); window.scrollTo({top:0}); }
+      else renderFinal();
+    }
+
+    function renderFinal() {
+      show('final-view');
+      $('answer-summary').innerHTML = [1,2,3,4,5].map(n => `<div class="answer-chip"><span>Station ${n}</span><strong>${state.answers[n] ?? '–'}</strong></div>`).join('');
+    }
+
+    $('to-briefing').addEventListener('click', () => {
+      const team = teams[state.team];
+      $('brief-team').textContent = `Lag ${team.name} · ${team.route.join(' → ')}`;
+      $('start-station').textContent = `Station ${team.route[0]}`;
+      show('briefing-view');
+    });
+    $('back-to-teams').addEventListener('click', () => show('start-view'));
+    $('begin-game').addEventListener('click', () => { state.round = 0; state.answers = {}; renderStation(); show('game-view'); });
+    $('review-answers').addEventListener('click', () => { state.round = 0; renderStation(); show('game-view'); });
+
+    buildTeams();
+  </script>
+</body>
+</html>
